@@ -1,0 +1,150 @@
+set nocompatible              " be iMproved, required
+set termguicolors
+filetype off                  " required
+set encoding=UTF-8
+command! Make silent w | silent make | unsilent redraw! | cwindow
+set clipboard+=unnamedplus
+let mapleader = "`"
+map <Leader><Space> :noh<CR>
+map <Leader><Leader> :cn<CR>
+"
+" Arrow keys suck
+noremap <Up> <C-w>-
+noremap <Down> <C-w>+
+noremap <Left> <C-w><
+noremap <Right> <C-w>>
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+Plugin 'gmarik/Vundle.vim'
+Plugin 'ludovicchabant/vim-gutentags'
+Plugin 'tpope/vim-fugitive'
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
+Plugin 'christoomey/vim-tmux-navigator'
+Bundle 'scrooloose/syntastic'
+Plugin 'scrooloose/nerdtree'
+Plugin 'Xuyuanp/nerdtree-git-plugin'
+Plugin 'ryanoasis/vim-devicons'
+Plugin 'easymotion/vim-easymotion'
+Plugin 'vim-python/python-syntax'
+Plugin 'kien/ctrlp.vim'
+Plugin 'sainnhe/gruvbox-material'
+call vundle#end()            " required
+
+syntax enable
+filetype plugin indent on
+set background=dark
+"let g:airline_theme='gruvbox'
+"let g:gruvbox_contrast_dark='hard'
+"let g:gruvbox_invert_tabline=1
+"let g:gruvbox_transparent_bg=1
+"colorscheme gruvbox
+" Airline stuff
+let g:airline_powerline_fonts = 1
+let g:webdevicons_enable = 1
+"let g:airline#extensions#tabline#enabled = 1
+"let g:airline#extensions#tabline#formatter = 'unique-tail-improved'
+
+" Syntastic stuff
+set laststatus=2
+set statusline+=%#warningmsg#
+"set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+
+let g:gruvbox_material_contrast='hard'
+let g:gruvbox_material_statusline_style = 'original'
+let g:gruvbox_material_enable_italic = 1
+let g:gruvbox_material_cursor = 'orange'
+let g:gruvbox_material_diagnostic_line_highlight = 1
+let g:gruvbox_material_transparent_background = 1
+let g:gruvbox_material_palette = 'material'
+let g:gruvbox_material_better_performance = 1
+colorscheme gruvbox-material
+let g:airline_theme='gruvbox_material'
+
+set tabstop=4
+set shiftwidth=4
+set expandtab
+set number
+set relativenumber
+
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+let NERDTreeQuitOnOpen=1
+
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
+
+map <C-t> :NERDTreeToggle<CR>
+let g:NERDTreeGitStatusShowIgnored = 1
+let NERDTreeIgnore = ['\.o$', '\.ao$', '\.sao$', '\.tao$', 'tags']
+
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+
+autocmd BufWritePost *.c make
+au BufRead,BufNewFile *.s set filetype=asm68k
+au Filetype asm68k setlocal ts=8 sts=8 sw=8
+au BufWritePost *.s make
+
+set mouse=a
+
+let g:ctrlp_map = '<c-p>'
+let g:ctrlp_cmd = 'CtrlPMixed'
+
+set rtp+=~/.fzf
+
+let g:python_highlight_all = 1
+
+function! Resize(dir)
+  let this = winnr()
+  if '+' == a:dir || '-' == a:dir
+    execute "normal \<c-w>k"
+    let up = winnr()
+    if up != this
+      execute "normal \<c-w>j"
+      let x = 'bottom'
+    else
+      let x = 'top'
+    endif
+  elseif '>' == a:dir || '<' == a:dir
+    execute "normal \<c-w>h"
+    let left = winnr()
+    if left != this
+      execute "normal \<c-w>l"
+      let x = 'right'
+    else
+      let x = 'left'
+    endif
+  endif
+  if ('+' == a:dir && 'bottom' == x) || ('-' == a:dir && 'top' == x)
+    return "5\<c-v>\<c-w>+"
+  elseif ('-' == a:dir && 'bottom' == x) || ('+' == a:dir && 'top' == x)
+    return "5\<c-v>\<c-w>-"
+  elseif ('<' == a:dir && 'left' == x) || ('>' == a:dir && 'right' == x)
+    return "5\<c-v>\<c-w><"
+  elseif ('>' == a:dir && 'left' == x) || ('<' == a:dir && 'right' == x)
+    return "5\<c-v>\<c-w>>"
+  else
+    echo "oops. check your ~/.vimrc"
+    return ""
+  endif
+endfunction
+
+nnoremap <S-Up> :normal <c-r>=Resize('+')<CR><CR>
+nnoremap <S-Down> :normal <c-r>=Resize('-')<CR><CR>
+nnoremap <S-Left> :normal <c-r>=Resize('<')<CR><CR>
+nnoremap <S-Right> :normal <c-r>=Resize('>')<CR><CR>
+
+" support for the error format of vbcc and vasm
+set errorformat+=error\ %n\ in\ line\ %s\ of\ \"REPEAT:%f:line\ %l\":\ %m%.%#
+set errorformat+=%f\|%l\ %n\|%m
+set errorformat+=%.%#included\ from\ line\ %l\ of\ \"%f"
+set errorformat+=error\ %n\ in\ line\ %l\ of\ \"%f\":\ %m 
+
+
